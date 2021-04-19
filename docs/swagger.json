@@ -1,0 +1,303 @@
+{
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "schemes": [
+    "https"
+  ],
+  "swagger": "2.0",
+  "info": {
+    "description": "Documentation of an example todo API.",
+    "title": "todo",
+    "version": "0.1.0"
+  },
+  "host": "localhost:8081",
+  "basePath": "/",
+  "paths": {
+    "/items": {
+      "get": {
+        "description": "Retrieves a list of todo items, the list is not filtered nor paginated.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "item"
+        ],
+        "summary": "Retrieves a list of todo items",
+        "operationId": "listItems",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/listItemsResponse"
+          },
+          "default": {
+            "$ref": "#/responses/genericError"
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "basicAuth": []
+          },
+          {
+            "type": [
+              "http"
+            ]
+          },
+          {
+            "scheme": [
+              "basic"
+            ]
+          }
+        ],
+        "description": "The item is given an ID on insertion to the data store.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "item"
+        ],
+        "summary": "Add a new item to the todo list.",
+        "operationId": "postItem",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/item"
+          },
+          "default": {
+            "$ref": "#/responses/genericError"
+          }
+        }
+      }
+    },
+    "/items/{itemID}": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "item"
+        ],
+        "summary": "Gets an item from the todo list given an ID.",
+        "operationId": "getItem",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "ID",
+            "description": "ID of todo item that needs to be fetched",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/item"
+          },
+          "default": {
+            "$ref": "#/responses/genericError"
+          }
+        }
+      },
+      "put": {
+        "security": [
+          {
+            "basicAuth": []
+          },
+          {
+            "type": [
+              "http"
+            ]
+          },
+          {
+            "scheme": [
+              "basic"
+            ]
+          }
+        ],
+        "description": "Sets the description and done flag to the input.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "item"
+        ],
+        "summary": "Updates an item from the todo list given an ID.",
+        "operationId": "putItem",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "ID",
+            "description": "ID of todo item that needs to be fetched",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/item"
+          },
+          "default": {
+            "$ref": "#/responses/genericError"
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "basicAuth": []
+          },
+          {
+            "type": [
+              "http"
+            ]
+          },
+          {
+            "scheme": [
+              "basic"
+            ]
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "item"
+        ],
+        "summary": "Deletes an item from the todo list given an ID.",
+        "operationId": "deleteItem",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "ID",
+            "description": "ID of todo item that needs to be fetched",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Item": {
+      "description": "item represents a todo item within the service",
+      "type": "object",
+      "required": [
+        "item",
+        "done"
+      ],
+      "properties": {
+        "done": {
+          "type": "boolean",
+          "x-go-name": "Done",
+          "example": false
+        },
+        "id": {
+          "$ref": "#/definitions/UUID"
+        },
+        "item": {
+          "type": "string",
+          "x-go-name": "Description",
+          "example": "do the laundry"
+        }
+      },
+      "x-go-package": "github.com/trelore/todoapi/internal"
+    },
+    "UUID": {
+      "description": "A UUID is a 128 bit (16 byte) Universal Unique IDentifier as defined in RFC\n4122.",
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "format": "uint8"
+      },
+      "x-go-package": "github.com/google/uuid"
+    }
+  },
+  "responses": {
+    "genericError": {
+      "description": "APIError example",
+      "headers": {
+        "ErrorCode": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "ErrorMessage": {
+          "type": "string"
+        }
+      }
+    },
+    "item": {
+      "description": "item represents a todo item within the service",
+      "schema": {
+        "$ref": "#/definitions/UUID"
+      },
+      "headers": {
+        "done": {
+          "type": "boolean",
+          "example": false,
+          "description": "Required: true"
+        },
+        "id": {
+          "example": "49830a50-6e63-4435-91b1-632607ba56bd",
+          "description": "in: id"
+        },
+        "item": {
+          "type": "string",
+          "example": "do the laundry",
+          "description": "Required: true"
+        }
+      }
+    },
+    "listItemsResponse": {
+      "description": "ListItemsResponse is the response from ListItems",
+      "headers": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Item"
+          },
+          "description": "A list of todo items and their done state"
+        }
+      }
+    }
+  }
+}
