@@ -33,7 +33,7 @@
           "item"
         ],
         "summary": "Retrieves a list of todo items",
-        "operationId": "listItems",
+        "operationId": "ListItems",
         "responses": {
           "200": {
             "$ref": "#/responses/listItemsResponse"
@@ -73,7 +73,7 @@
           "item"
         ],
         "summary": "Add a new item to the todo list.",
-        "operationId": "postItem",
+        "operationId": "PostItem",
         "responses": {
           "200": {
             "$ref": "#/responses/item"
@@ -99,7 +99,7 @@
           "item"
         ],
         "summary": "Gets an item from the todo list given an ID.",
-        "operationId": "getItem",
+        "operationId": "GetItem",
         "parameters": [
           {
             "type": "string",
@@ -150,16 +150,6 @@
         ],
         "summary": "Updates an item from the todo list given an ID.",
         "operationId": "putItem",
-        "parameters": [
-          {
-            "type": "string",
-            "x-go-name": "ID",
-            "description": "ID of todo item that needs to be fetched",
-            "name": "id",
-            "in": "path",
-            "required": true
-          }
-        ],
         "responses": {
           "200": {
             "$ref": "#/responses/item"
@@ -199,19 +189,12 @@
         ],
         "summary": "Deletes an item from the todo list given an ID.",
         "operationId": "deleteItem",
-        "parameters": [
-          {
-            "type": "string",
-            "x-go-name": "ID",
-            "description": "ID of todo item that needs to be fetched",
-            "name": "id",
-            "in": "path",
-            "required": true
-          }
-        ],
         "responses": {
           "204": {
             "description": ""
+          },
+          "default": {
+            "$ref": "#/responses/genericError"
           }
         }
       }
@@ -256,11 +239,11 @@
     "genericError": {
       "description": "APIError example",
       "headers": {
-        "ErrorCode": {
+        "error_code": {
           "type": "integer",
           "format": "int64"
         },
-        "ErrorMessage": {
+        "error_message": {
           "type": "string"
         }
       }

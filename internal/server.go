@@ -63,7 +63,7 @@ func (s server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.router.ServeHTTP(w, r)
 }
 
-// swagger:parameters getItem deleteItem putItem
+// swagger:parameters GetItem DeleteItem PutItem
 type idParam struct {
 	/* ID of todo item that needs to be fetched
 	Required: true
