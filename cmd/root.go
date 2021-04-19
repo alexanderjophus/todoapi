@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -12,6 +13,7 @@ import (
 	"github.com/trelore/todoapi/internal"
 	"github.com/trelore/todoapi/internal/datastores/mem"
 	"github.com/trelore/todoapi/internal/middlewares"
+	"go.uber.org/zap"
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -26,6 +28,13 @@ var rootCmd = &cobra.Command{
 }
 
 func run() error {
+	logger, err := zap.NewProduction()
+	if err != nil {
+		return fmt.Errorf("new logger: %w", err)
+	}
+	defer logger.Sync() // flushes buffer, if any
+	sugar := logger.Sugar()
+
 	// Create channel for shutdown signals.
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt)
@@ -34,7 +43,7 @@ func run() error {
 	// go routine serving the swagger docs
 	go func() {
 		docsPort := ":8083"
-		log.Printf("serving docs on port: %s", docsPort)
+		sugar.Infof("serving docs on port: %s", docsPort)
 		fs := http.FileServer(http.Dir("."))
 		http.Handle("/swaggerui/", http.StripPrefix("/swaggerui/", fs))
 		err := http.ListenAndServe(docsPort, nil)
@@ -47,15 +56,15 @@ func run() error {
 	go func() {
 		s := internal.NewServer(mem.New())
 		port := ":8081"
-		log.Printf("running on address: %s", port)
+		sugar.Infof("running on address: %s", port)
 		http.ListenAndServe(port, alice.New(
 			middlewares.Recovery,
-			middlewares.Logging,
+			middlewares.Logging(sugar),
 		).Then(s))
 	}()
 	<-stop
 
-	log.Println("closing server")
+	sugar.Infof("closing server")
 	return nil
 }
 
