@@ -36,10 +36,9 @@ While we could just use the standard library, alice offers a simple alternative 
 Todo list:
 - api tests
 - helpful error messages (notfound etc)
-- external database
+- external database (postgres/redis?)
 - unit tests
 - Makefile
-- kubernetes?
 - configure ports
 - documentation
     - openapi

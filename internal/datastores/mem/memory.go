@@ -58,7 +58,7 @@ func (m *memory) Get(id string) (*internal.Item, error) {
 func (m *memory) Delete(id string) error {
 	i, err := uuid.Parse(id)
 	if err != nil {
-		return ErrInvalidID
+		return err
 	}
 	m.items[i] = nil
 	return nil
@@ -68,13 +68,12 @@ func (m *memory) Delete(id string) error {
 func (m *memory) Upsert(id string, item *internal.Item) (_ *internal.Item, err error) {
 	item.ID, err = uuid.Parse(id)
 	if err != nil {
-		return nil, ErrInvalidID
+		return nil, err
 	}
 	m.items[item.ID] = item
 	return item, nil
 }
 
 var (
-	ErrNoData    = fmt.Errorf("no data")
-	ErrInvalidID = fmt.Errorf("invalid id")
+	ErrNoData = fmt.Errorf("no data")
 )

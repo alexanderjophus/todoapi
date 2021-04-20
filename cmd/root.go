@@ -6,12 +6,14 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	"github.com/justinas/alice"
 	"github.com/spf13/cobra"
 	"github.com/trelore/todoapi/internal"
 	"github.com/trelore/todoapi/internal/datastores/mem"
+	"github.com/trelore/todoapi/internal/datastores/redis"
 	"github.com/trelore/todoapi/internal/middlewares"
 	"go.uber.org/zap"
 )
@@ -21,13 +23,13 @@ var rootCmd = &cobra.Command{
 	Use:   "todoapi",
 	Short: "A small todo API",
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := run(); err != nil {
+		if err := run(strings.ToLower(os.Getenv("DATASTORE"))); err != nil {
 			log.Fatal(err)
 		}
 	},
 }
 
-func run() error {
+func run(datastore string) error {
 	logger, err := zap.NewProduction()
 	if err != nil {
 		return fmt.Errorf("new logger: %w", err)
@@ -52,9 +54,18 @@ func run() error {
 		}
 	}()
 
+	var db internal.Datastore
+	switch datastore {
+	case "redis":
+		db = redis.New(sugar)
+	default:
+		sugar.Warn("using in memory datastore")
+		db = mem.New()
+	}
+
 	// go routine serving the todo app
 	go func() {
-		s := internal.NewServer(mem.New())
+		s := internal.NewServer(db)
 		port := ":8081"
 		sugar.Infof("running on address: %s", port)
 		http.ListenAndServe(port, alice.New(
