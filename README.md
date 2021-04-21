@@ -4,6 +4,22 @@
 
 Run the service locally either by running from source or by using the provided docker image.
 
+Use in memory datastore
+
+```sh
+go run main.go
+```
+
+Then hit `localhost:8083/swaggerui` for a list of API features!
+
+To use redis storage
+
+```sh
+docker-compose up
+```
+
+will bring up a redis database on port 6379 as well as the todo API service on port 8081.
+
 ## Notes
 
 - ListItems with a redis backing is currently unsupported
@@ -52,9 +68,8 @@ Todo list:
 - configure
     - ports
     - redis address
+    - postgres address
 - documentation
-    - openapi
-    - comments
     - README
 - healthcheck
 - metrics?
