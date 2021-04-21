@@ -50,10 +50,10 @@ func NewServer(db Datastore) server {
 		db:     db,
 	}
 
-	s.router.POST("/items", middlewares.BasicAuth(s.postItem))
-	s.router.GET("/items", s.listItems)
-	s.router.GET("/items/:id", s.getItem)
-	s.router.DELETE("/items/:id", middlewares.BasicAuth(s.deleteItem))
+	s.router.POST("/items", middlewares.BasicAuth(s.PostItem))
+	s.router.GET("/items", s.ListItems)
+	s.router.GET("/items/:id", s.GetItem)
+	s.router.DELETE("/items/:id", middlewares.BasicAuth(s.DeleteItem))
 	s.router.PUT("/items/:id", middlewares.BasicAuth(s.putItem))
 	return s
 }
@@ -76,6 +76,6 @@ type idParam struct {
 //
 // swagger:response genericError
 type APIError struct {
-	ErrorCode    int
-	ErrorMessage string
+	ErrorCode    int    `json:"error_code"`
+	ErrorMessage string `json:"error_message"`
 }

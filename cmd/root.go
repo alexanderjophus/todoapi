@@ -23,13 +23,13 @@ var rootCmd = &cobra.Command{
 	Use:   "todoapi",
 	Short: "A small todo API",
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := run(strings.ToLower(os.Getenv("DATASTORE"))); err != nil {
+		if err := run(); err != nil {
 			log.Fatal(err)
 		}
 	},
 }
 
-func run(datastore string) error {
+func run() error {
 	logger, err := zap.NewProduction()
 	if err != nil {
 		return fmt.Errorf("new logger: %w", err)
@@ -55,7 +55,7 @@ func run(datastore string) error {
 	}()
 
 	var db internal.Datastore
-	switch datastore {
+	switch strings.ToLower(os.Getenv("DATASTORE")) {
 	case "redis":
 		db = redis.New(sugar)
 	default:

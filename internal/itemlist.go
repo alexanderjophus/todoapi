@@ -7,7 +7,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-/* swagger:route GET /items item listItems
+/* swagger:route GET /items item ListItems
 Retrieves a list of todo items
 
 Retrieves a list of todo items, the list is not filtered nor paginated.
@@ -24,7 +24,7 @@ Retrieves a list of todo items, the list is not filtered nor paginated.
 		default: genericError
 		200: listItemsResponse
 */
-func (s server) listItems(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func (s server) ListItems(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	// lists everything in the datastore
 	is, err := s.db.List()
 	if err != nil {

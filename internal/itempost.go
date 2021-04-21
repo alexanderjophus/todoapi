@@ -7,7 +7,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-/* swagger:route POST /items item postItem
+/* swagger:route POST /items item PostItem
 Add a new item to the todo list.
 
 The item is given an ID on insertion to the data store.
@@ -29,7 +29,7 @@ The item is given an ID on insertion to the data store.
 		default: genericError
 		200: item
 */
-func (s server) postItem(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func (s server) PostItem(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	// parse the input (no validation is done here)
 	var in PostItemRequest
 	err := json.NewDecoder(r.Body).Decode(&in)

@@ -7,20 +7,20 @@ import (
 	"github.com/trelore/todoapi/internal"
 )
 
-// memory is an in memory implementation of Datastore
-type memory struct {
+// Memory is an in Memory implementation of Datastore
+type Memory struct {
 	items map[uuid.UUID]*internal.Item
 }
 
 // New creates a new in memory data store
-func New() *memory {
-	return &memory{
+func New() *Memory {
+	return &Memory{
 		items: map[uuid.UUID]*internal.Item{},
 	}
 }
 
 // Insert implements the interface
-func (m *memory) Insert(description string) (*internal.Item, error) {
+func (m *Memory) Insert(description string) (*internal.Item, error) {
 	i := &internal.Item{
 		ID:          uuid.New(),
 		Description: description,
@@ -32,7 +32,7 @@ func (m *memory) Insert(description string) (*internal.Item, error) {
 }
 
 // List implements the interface
-func (m *memory) List() ([]*internal.Item, error) {
+func (m *Memory) List() ([]*internal.Item, error) {
 	items := []*internal.Item{}
 	for _, v := range m.items {
 		if v.ID == uuid.Nil {
@@ -45,7 +45,7 @@ func (m *memory) List() ([]*internal.Item, error) {
 }
 
 // Get implements the interface
-func (m *memory) Get(id string) (*internal.Item, error) {
+func (m *Memory) Get(id string) (*internal.Item, error) {
 	item := m.items[uuid.MustParse(id)]
 	if item == nil {
 		return nil, ErrNoData
@@ -55,7 +55,7 @@ func (m *memory) Get(id string) (*internal.Item, error) {
 }
 
 // Delete implements the interface
-func (m *memory) Delete(id string) error {
+func (m *Memory) Delete(id string) error {
 	i, err := uuid.Parse(id)
 	if err != nil {
 		return err
@@ -65,7 +65,7 @@ func (m *memory) Delete(id string) error {
 }
 
 // Upsert implements the interface
-func (m *memory) Upsert(id string, item *internal.Item) (_ *internal.Item, err error) {
+func (m *Memory) Upsert(id string, item *internal.Item) (_ *internal.Item, err error) {
 	item.ID, err = uuid.Parse(id)
 	if err != nil {
 		return nil, err
