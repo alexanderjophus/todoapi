@@ -11,8 +11,10 @@ import (
 
 	"github.com/justinas/alice"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"github.com/trelore/todoapi/internal"
 	"github.com/trelore/todoapi/internal/datastores/mem"
+	"github.com/trelore/todoapi/internal/datastores/postgres"
 	"github.com/trelore/todoapi/internal/datastores/redis"
 	"github.com/trelore/todoapi/internal/middlewares"
 	"go.uber.org/zap"
@@ -46,11 +48,11 @@ func run() error {
 	go func() {
 		docsPort := ":8083"
 		sugar.Infof("serving docs on port: %s", docsPort)
-		fs := http.FileServer(http.Dir("."))
+		fs := http.FileServer(http.Dir("./docs"))
 		http.Handle("/swaggerui/", http.StripPrefix("/swaggerui/", fs))
 		err := http.ListenAndServe(docsPort, nil)
 		if err != nil {
-			log.Fatal(err)
+			sugar.Fatal(err)
 		}
 	}()
 
@@ -58,6 +60,14 @@ func run() error {
 	switch strings.ToLower(os.Getenv("DATASTORE")) {
 	case "redis":
 		db = redis.New(sugar)
+	case "postgres":
+		var close func() error
+		var err error
+		db, close, err = postgres.New()
+		if err != nil {
+			sugar.Fatal(err)
+		}
+		defer close()
 	default:
 		sugar.Warn("using in memory datastore")
 		db = mem.New()
@@ -77,6 +87,10 @@ func run() error {
 
 	sugar.Infof("closing server")
 	return nil
+}
+
+func init() {
+	rootCmd.Flags().StringP("datastore", "d", viper.GetString("DATASTORE"), "Choose which datastore you want to use (set to `POSTGRES` to use postgres, etc..).")
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
