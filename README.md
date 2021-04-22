@@ -2,6 +2,8 @@
 
 ## Usage
 
+### Quick Start
+
 Run the service locally either by running from source or by using the provided docker image.
 
 Use in memory datastore
@@ -12,15 +14,17 @@ go run main.go
 
 Then hit `localhost:8083/swaggerui` for a list of API features!
 
-To use redis storage
+### Redis
+
+To use redis, either follow the configuration steps below or for a quick start do the following;
 
 ```sh
-docker-compose up
+docker-compose -f docker-compose-redis.yml up
 ```
 
 will bring up a redis database on port 6379 as well as the todo API service on port 8081.
 
-## Notes
+#### Notes
 
 - ListItems with a redis backing is currently unsupported
 
@@ -31,8 +35,14 @@ Set `DATASTORE` to either `postgres` or `redis` to use that datastore.
 
 ### Configuring Redis
 
-When usiing redis the following env vars are set
+When using redis the following env vars are set
 - `REDIS_ADDRESS` which sets the address including the port. If not set, it will be `db:6379` (which works with the docker compose file).
+
+###  Configuring Postgres
+
+- `POSTGRES_NAME` set the postgres database name defaults to `postgres`
+- `POSTGRES_USER` set the postgres user defaults to `postgres`
+- `POSTGRES_PASS` set the postgres password defaults to `postgres`
 
 ## Technical decisions
 
@@ -79,10 +89,6 @@ The write requests (POST, PUT, DELETE) are authenticated with basic auth, using 
 
 Todo list:
 - rest of API tests
-- configure
-    - ports
-    - redis address
-    - postgres address
 - documentation
     - README
 - healthcheck

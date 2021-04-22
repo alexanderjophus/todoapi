@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
@@ -25,15 +26,25 @@ type p struct {
 //go:embed migrations/*.sql
 var migrationsFS embed.FS
 
-const (
-	DB_USER     = "postgres"
-	DB_PASSWORD = "postgres"
-	DB_NAME     = "postgres"
+var (
+	dbName     = "postgres"
+	dbUser     = "postgres"
+	dbPassword = "postgres"
 )
 
 func New() (*p, func() error, error) {
+	if name := os.Getenv("POSTGRES_NAME"); name != "" {
+		dbName = name
+	}
+	if user := os.Getenv("POSTGRES_USER"); user != "" {
+		dbUser = user
+	}
+	if pass := os.Getenv("POSTGRES_PASS"); pass != "" {
+		dbPassword = pass
+	}
+
 	dsn := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable",
-		DB_USER, DB_PASSWORD, DB_NAME)
+		dbUser, dbPassword, dbName)
 
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
@@ -47,7 +58,7 @@ func New() (*p, func() error, error) {
 	if err != nil {
 		return nil, nil, fmt.Errorf("getting migration files: %w", err)
 	}
-	mig, err := migrate.NewWithInstance("httpfs", source, DB_NAME, driver)
+	mig, err := migrate.NewWithInstance("httpfs", source, dbName, driver)
 	if err != nil {
 		return nil, nil, fmt.Errorf("migration instance: %w", err)
 	}
