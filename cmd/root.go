@@ -46,7 +46,10 @@ func run() error {
 
 	// go routine serving the swagger docs
 	go func() {
-		docsPort := ":8083"
+		docsPort := os.Getenv("DOCS_PORT")
+		if docsPort != "" {
+			docsPort = ":8083"
+		}
 		sugar.Infof("serving docs on port: %s", docsPort)
 		fs := http.FileServer(http.Dir("./docs"))
 		http.Handle("/swaggerui/", http.StripPrefix("/swaggerui/", fs))
@@ -76,8 +79,11 @@ func run() error {
 
 	// go routine serving the todo app
 	go func() {
+		port := os.Getenv("PORT")
+		if port != "" {
+			port = ":8081"
+		}
 		s := internal.NewServer(db)
-		port := ":8081"
 		sugar.Infof("running on address: %s", port)
 		http.ListenAndServe(port, alice.New(
 			middlewares.Recovery,

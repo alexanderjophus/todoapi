@@ -31,7 +31,9 @@ will bring up a redis database on port 6379 as well as the todo API service on p
 ## Configuration
 
 Configuration is supported via environment variables.
-Set `DATASTORE` to either `postgres` or `redis` to use that datastore.
+Set `DATASTORE` to either `postgres` or `redis` to use that datastore (default `memory`)
+Set `PORT` to set the port of the service (default `8081`)
+Set `DOCS_PORT` to set the port of the documentation (default `8083`)
 
 ### Configuring Redis
 
