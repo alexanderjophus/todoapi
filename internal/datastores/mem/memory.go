@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/trelore/todoapi/internal"
+	"github.com/trelore/todoapi/internal/datastores"
 )
 
 // Memory is an in Memory implementation of Datastore
@@ -46,9 +47,13 @@ func (m *Memory) List() ([]*internal.Item, error) {
 
 // Get implements the interface
 func (m *Memory) Get(id string) (*internal.Item, error) {
-	item := m.items[uuid.MustParse(id)]
+	i, err := uuid.Parse(id)
+	if err != nil {
+		return nil, fmt.Errorf("parse uuid: %w", err)
+	}
+	item := m.items[i]
 	if item == nil {
-		return nil, ErrNoData
+		return nil, datastores.ErrNoData
 	}
 
 	return item, nil
@@ -58,7 +63,7 @@ func (m *Memory) Get(id string) (*internal.Item, error) {
 func (m *Memory) Delete(id string) error {
 	i, err := uuid.Parse(id)
 	if err != nil {
-		return err
+		return fmt.Errorf("parse uuid: %w", err)
 	}
 	m.items[i] = nil
 	return nil
@@ -68,12 +73,8 @@ func (m *Memory) Delete(id string) error {
 func (m *Memory) Upsert(id string, item *internal.Item) (_ *internal.Item, err error) {
 	item.ID, err = uuid.Parse(id)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("parse uuid: %w", err)
 	}
 	m.items[item.ID] = item
 	return item, nil
 }
-
-var (
-	ErrNoData = fmt.Errorf("no data")
-)

@@ -34,19 +34,19 @@ func (s server) PostItem(w http.ResponseWriter, r *http.Request, _ httprouter.Pa
 	var in PostItemRequest
 	err := json.NewDecoder(r.Body).Decode(&in)
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	// insert into the data store
 	q, err := s.db.Insert(in.Description)
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	// marshals it into bytes to respond with
 	b, err := json.Marshal(q)
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.Write(b)

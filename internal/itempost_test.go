@@ -20,7 +20,7 @@ func Test_server_PostItem(t *testing.T) {
 		status int
 	}{
 		{
-			name:   "happy path: list existing items",
+			name:   "happy path: post item",
 			status: http.StatusOK,
 		},
 	}

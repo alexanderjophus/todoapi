@@ -65,7 +65,7 @@ func (p *p) Delete(id string) error {
 	query := `DELETE FROM todo WHERE id = $1`
 	_, err := p.db.Exec(query, id)
 	if err != nil {
-		return err
+		return fmt.Errorf("deleting item: %w", err)
 	}
 	return nil
 }
@@ -76,7 +76,7 @@ func (p *p) Insert(description string) (*internal.Item, error) {
 	query := `INSERT INTO todo (description) VALUES ($1) RETURNING id, done`
 	err := p.db.QueryRow(query, description).Scan(&item.ID, &item.Done)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("inserting item: %w", err)
 	}
 	item.Description = description
 	return &item, nil
@@ -87,7 +87,7 @@ func (p *p) List() ([]*internal.Item, error) {
 	query := `SELECT id, description, done FROM todo`
 	rows, err := p.db.Query(query)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("querying items: %w", err)
 	}
 	defer rows.Close()
 	var items []*internal.Item
@@ -121,7 +121,7 @@ func (p *p) Upsert(id string, item *internal.Item) (*internal.Item, error) {
 	const query = `UPDATE todo SET description = $2, done=$3 WHERE id = $1 RETURNING id, description, done`
 	err := p.db.QueryRow(query, id, item.Description, item.Done).Scan(&item.ID, &item.Description, &item.Done)
 	if err != nil {
-		return nil, fmt.Errorf("querying row: %w", err)
+		return nil, fmt.Errorf("upserting row: %w", err)
 	}
 	return item, nil
 }

@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/julienschmidt/httprouter"
+	"github.com/trelore/todoapi/internal/datastores"
 )
 
 /* swagger:route GET /items/{itemID} item GetItem
@@ -28,20 +29,23 @@ func (s server) GetItem(w http.ResponseWriter, r *http.Request, ps httprouter.Pa
 		ID: ps.ByName("id"),
 	}
 	if _, err := uuid.Parse(params.ID); err != nil {
-		// write to error
-		w.WriteHeader(http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	i, err := s.db.Get(params.ID)
 	if err != nil {
+		if err == datastores.ErrNoData {
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
 		// better error handling (404)
-		http.Error(w, err.Error(), 500)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	// marshals it into bytes to respond with
 	b, err := json.Marshal(i)
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.Write(b)

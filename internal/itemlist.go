@@ -28,13 +28,13 @@ func (s server) ListItems(w http.ResponseWriter, r *http.Request, _ httprouter.P
 	// lists everything in the datastore
 	is, err := s.db.List()
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	// marshals it into bytes to respond with
 	b, err := json.Marshal(&is)
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.Write(b)

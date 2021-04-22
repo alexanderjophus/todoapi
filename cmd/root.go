@@ -65,7 +65,7 @@ func run() error {
 		var err error
 		db, close, err = postgres.New()
 		if err != nil {
-			sugar.Fatal(err)
+			return fmt.Errorf("new postgres: %w", err)
 		}
 		defer close()
 	default:

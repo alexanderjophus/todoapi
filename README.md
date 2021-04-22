@@ -57,14 +57,16 @@ Obviously the more datastore types we support the more work we need to do to mai
 A decision was made to test the server using the in memory datastore.
 This allows minimal use of mocks (none) to test the whole flow of the system.
 
+The postgres and redis solution have so far been manually tested.
+There are plans in the near future to automate those too.
+
 ## Todo
 
 Todo list:
-- api tests
-- unit tests
-- better errors
-- helpful error messages (notfound etc)
-- Makefile
+- rest of API tests
+- test item put
+- errors
+    - status codes
 - configure
     - ports
     - redis address
@@ -74,3 +76,5 @@ Todo list:
 - healthcheck
 - metrics?
 - change in mem key from UUID to string
+- embed docs
+- datastore takes context

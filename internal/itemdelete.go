@@ -32,10 +32,12 @@ func (s server) DeleteItem(w http.ResponseWriter, r *http.Request, ps httprouter
 		ID: ps.ByName("id"),
 	}
 	if _, err := uuid.Parse(params.ID); err != nil {
-		// write to error
-		w.WriteHeader(http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	s.db.Delete(params.ID)
+	if err := s.db.Delete(params.ID); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	w.WriteHeader(http.StatusNoContent)
 }
