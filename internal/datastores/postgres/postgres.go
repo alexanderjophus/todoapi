@@ -3,6 +3,7 @@ package postgres
 import (
 	"database/sql"
 	"embed"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -31,10 +32,10 @@ const (
 )
 
 func New() (*p, func() error, error) {
-	dbinfo := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable",
+	dsn := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable",
 		DB_USER, DB_PASSWORD, DB_NAME)
 
-	db, err := sql.Open("postgres", dbinfo)
+	db, err := sql.Open("postgres", dsn)
 	if err != nil {
 		return nil, nil, fmt.Errorf("opening postgres: %w", err)
 	}
@@ -51,7 +52,7 @@ func New() (*p, func() error, error) {
 		return nil, nil, fmt.Errorf("migration instance: %w", err)
 	}
 	err = mig.Up()
-	if err != nil {
+	if err != nil && !errors.Is(err, migrate.ErrNoChange) {
 		return nil, nil, fmt.Errorf("migrating up: %w", err)
 	}
 	return &p{
@@ -61,25 +62,66 @@ func New() (*p, func() error, error) {
 
 // Delete implements the interface
 func (p *p) Delete(id string) error {
+	query := `DELETE FROM todo WHERE id = $1`
+	_, err := p.db.Exec(query, id)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
 // Insert implements the interface
 func (p *p) Insert(description string) (*internal.Item, error) {
-	return nil, nil
+	item := internal.Item{}
+	query := `INSERT INTO todo (description) VALUES ($1) RETURNING id, done`
+	err := p.db.QueryRow(query, description).Scan(&item.ID, &item.Done)
+	if err != nil {
+		return nil, err
+	}
+	item.Description = description
+	return &item, nil
 }
 
 // List implements the interface
 func (p *p) List() ([]*internal.Item, error) {
-	return nil, nil
+	query := `SELECT id, description, done FROM todo`
+	rows, err := p.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []*internal.Item
+	for rows.Next() {
+		var item internal.Item
+		if err = rows.Scan(&item.ID, &item.Description, &item.Done); err != nil {
+			return nil, fmt.Errorf("scanning row: %w", err)
+		}
+		items = append(items, &item)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterating result set: %w", err)
+	}
+
+	return items, nil
 }
 
 // Get implements the interface
 func (p *p) Get(id string) (*internal.Item, error) {
-	return nil, nil
+	var item internal.Item
+	query := `SELECT id, description, done FROM todo WHERE id = $1`
+	err := p.db.QueryRow(query, id).Scan(&item.ID, &item.Description, &item.Done)
+	if err != nil {
+		return nil, fmt.Errorf("querying row: %w", err)
+	}
+	return &item, nil
 }
 
 // Upsert implements the interface
 func (p *p) Upsert(id string, item *internal.Item) (*internal.Item, error) {
-	return nil, nil
+	const query = `UPDATE todo SET description = $2, done=$3 WHERE id = $1 RETURNING id, description, done`
+	err := p.db.QueryRow(query, id, item.Description, item.Done).Scan(&item.ID, &item.Description, &item.Done)
+	if err != nil {
+		return nil, fmt.Errorf("querying row: %w", err)
+	}
+	return item, nil
 }
