@@ -24,6 +24,16 @@ will bring up a redis database on port 6379 as well as the todo API service on p
 
 - ListItems with a redis backing is currently unsupported
 
+## Configuration
+
+Configuration is supported via environment variables.
+Set `DATASTORE` to either `postgres` or `redis` to use that datastore.
+
+### Configuring Redis
+
+When usiing redis the following env vars are set
+- `REDIS_ADDRESS` which sets the address including the port. If not set, it will be `db:6379` (which works with the docker compose file).
+
 ## Technical decisions
 
 ### Generating docs from code
@@ -60,13 +70,15 @@ This allows minimal use of mocks (none) to test the whole flow of the system.
 The postgres and redis solution have so far been manually tested.
 There are plans in the near future to automate those too.
 
+### Authentication
+
+The read requests (GET and LIST) are not authenticated, anyone can call these to see what our user is up to.
+The write requests (POST, PUT, DELETE) are authenticated with basic auth, using the username `steve` and the password `netherite`.
+
 ## Todo
 
 Todo list:
 - rest of API tests
-- test item put
-- errors
-    - status codes
 - configure
     - ports
     - redis address
@@ -78,3 +90,4 @@ Todo list:
 - change in mem key from UUID to string
 - embed docs
 - datastore takes context
+- CI?

@@ -3,6 +3,7 @@ package redis
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 
 	"github.com/go-redis/redis"
 	"github.com/google/uuid"
@@ -16,8 +17,13 @@ type r struct {
 }
 
 func New(sugar *zap.SugaredLogger) *r {
+	addr := os.Getenv("REDIS_ADDRESS")
+	if addr == "" {
+		addr = "db:6379"
+	}
+
 	client := redis.NewClient(&redis.Options{
-		Addr:     "db:6379",
+		Addr:     addr,
 		Password: "",
 		DB:       0,
 	})

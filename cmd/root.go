@@ -56,6 +56,7 @@ func run() error {
 		}
 	}()
 
+	// choose the datastore
 	var db internal.Datastore
 	switch strings.ToLower(os.Getenv("DATASTORE")) {
 	case "redis":
