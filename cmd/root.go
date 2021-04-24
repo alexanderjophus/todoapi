@@ -13,6 +13,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/trelore/todoapi/docs"
 	"github.com/trelore/todoapi/internal"
 	"github.com/trelore/todoapi/internal/datastores/mem"
 	"github.com/trelore/todoapi/internal/datastores/postgres"
@@ -94,7 +95,8 @@ func run() error {
 			docsPort = "8083"
 		}
 		sugar.Infof("serving docs on port: %s", docsPort)
-		fs := http.FileServer(http.Dir("./docs"))
+
+		fs := http.FileServer(http.FS(docs.Docs))
 		http.Handle("/swaggerui/", http.StripPrefix("/swaggerui/", fs))
 		err := http.ListenAndServe(":"+docsPort, nil)
 		if err != nil {
