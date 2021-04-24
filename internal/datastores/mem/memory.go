@@ -12,7 +12,7 @@ import (
 // Memory is an in Memory implementation of Datastore
 type Memory struct {
 	items map[uuid.UUID]*internal.Item
-	*sync.Mutex
+	sync.Mutex
 }
 
 // New creates a new in memory data store
