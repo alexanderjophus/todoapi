@@ -2,6 +2,9 @@
 
 ## Usage
 
+Notes;
+- Requires Go 1.16 (or use the provided docker image)
+
 ### Quick Start
 
 Run the service locally either by running from source or by using the provided docker image.
@@ -92,11 +95,9 @@ The write requests (POST, PUT, DELETE) are authenticated with basic auth, using 
 
 Todo list:
 - rest of API tests
-- race conditions in in mem
 - documentation
     - README
 - healthcheck
 - change in mem key from UUID to string
 - embed docs
 - datastore takes context
-- CI?

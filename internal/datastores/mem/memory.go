@@ -2,6 +2,7 @@ package mem
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/google/uuid"
 	"github.com/trelore/todoapi/internal"
@@ -11,6 +12,7 @@ import (
 // Memory is an in Memory implementation of Datastore
 type Memory struct {
 	items map[uuid.UUID]*internal.Item
+	*sync.Mutex
 }
 
 // New creates a new in memory data store
@@ -27,6 +29,8 @@ func (m *Memory) Insert(description string) (*internal.Item, error) {
 		Description: description,
 		Done:        false,
 	}
+	m.Lock()
+	defer m.Unlock()
 	m.items[i.ID] = i
 
 	return i, nil
@@ -35,6 +39,8 @@ func (m *Memory) Insert(description string) (*internal.Item, error) {
 // List implements the interface
 func (m *Memory) List() ([]*internal.Item, error) {
 	items := []*internal.Item{}
+	m.Lock()
+	defer m.Unlock()
 	for _, v := range m.items {
 		if v.ID == uuid.Nil {
 			continue
@@ -51,6 +57,8 @@ func (m *Memory) Get(id string) (*internal.Item, error) {
 	if err != nil {
 		return nil, fmt.Errorf("parse uuid: %w", err)
 	}
+	m.Lock()
+	defer m.Unlock()
 	item := m.items[i]
 	if item == nil {
 		return nil, datastores.ErrNoData
@@ -65,6 +73,8 @@ func (m *Memory) Delete(id string) error {
 	if err != nil {
 		return fmt.Errorf("parse uuid: %w", err)
 	}
+	m.Lock()
+	defer m.Unlock()
 	m.items[i] = nil
 	return nil
 }
@@ -75,6 +85,8 @@ func (m *Memory) Upsert(id string, item *internal.Item) (_ *internal.Item, err e
 	if err != nil {
 		return nil, fmt.Errorf("parse uuid: %w", err)
 	}
+	m.Lock()
+	defer m.Unlock()
 	m.items[item.ID] = item
 	return item, nil
 }
