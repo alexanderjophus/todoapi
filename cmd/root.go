@@ -10,6 +10,7 @@ import (
 	"syscall"
 
 	"github.com/justinas/alice"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/trelore/todoapi/internal"
@@ -39,26 +40,6 @@ func run() error {
 	defer logger.Sync() // flushes buffer, if any
 	sugar := logger.Sugar()
 
-	// Create channel for shutdown signals.
-	stop := make(chan os.Signal, 1)
-	signal.Notify(stop, os.Interrupt)
-	signal.Notify(stop, syscall.SIGTERM)
-
-	// go routine serving the swagger docs
-	go func() {
-		docsPort := os.Getenv("DOCS_PORT")
-		if docsPort != "" {
-			docsPort = ":8083"
-		}
-		sugar.Infof("serving docs on port: %s", docsPort)
-		fs := http.FileServer(http.Dir("./docs"))
-		http.Handle("/swaggerui/", http.StripPrefix("/swaggerui/", fs))
-		err := http.ListenAndServe(docsPort, nil)
-		if err != nil {
-			sugar.Fatal(err)
-		}
-	}()
-
 	// choose the datastore
 	var db internal.Datastore
 	switch strings.ToLower(os.Getenv("DATASTORE")) {
@@ -80,16 +61,52 @@ func run() error {
 	// go routine serving the todo app
 	go func() {
 		port := os.Getenv("PORT")
-		if port != "" {
-			port = ":8081"
+		if port == "" {
+			port = "8081"
 		}
 		s := internal.NewServer(db)
-		sugar.Infof("running on address: %s", port)
-		http.ListenAndServe(port, alice.New(
+		sugar.Infof("running on port: %s", port)
+		http.ListenAndServe(":"+port, alice.New(
 			middlewares.Recovery,
 			middlewares.Logging(sugar),
 		).Then(s))
 	}()
+
+	// metrics
+	go func() {
+		metricsPort := os.Getenv("METRICS_PORT")
+		if metricsPort == "" {
+			metricsPort = "8082"
+		}
+		sugar.Infof("serving metrics on port: %s", metricsPort)
+		http.Handle("/metrics", promhttp.Handler())
+		err := http.ListenAndServe(":"+metricsPort, nil)
+		if err != nil {
+			sugar.Fatal(err)
+		}
+
+	}()
+
+	// go routine serving the swagger docs
+	go func() {
+		docsPort := os.Getenv("DOCS_PORT")
+		if docsPort == "" {
+			docsPort = "8083"
+		}
+		sugar.Infof("serving docs on port: %s", docsPort)
+		fs := http.FileServer(http.Dir("./docs"))
+		http.Handle("/swaggerui/", http.StripPrefix("/swaggerui/", fs))
+		err := http.ListenAndServe(":"+docsPort, nil)
+		if err != nil {
+			sugar.Fatal(err)
+		}
+	}()
+
+	// Create channel for shutdown signals.
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt)
+	signal.Notify(stop, syscall.SIGTERM)
+
 	<-stop
 
 	sugar.Infof("closing server")

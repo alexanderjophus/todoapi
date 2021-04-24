@@ -34,6 +34,7 @@ Configuration is supported via environment variables.
 Set `DATASTORE` to either `postgres` or `redis` to use that datastore (default `memory`)
 Set `PORT` to set the port of the service (default `8081`)
 Set `DOCS_PORT` to set the port of the documentation (default `8083`)
+Set `METRICS_PORT`to set the port of the metrics.
 
 ### Configuring Redis
 
@@ -91,10 +92,10 @@ The write requests (POST, PUT, DELETE) are authenticated with basic auth, using 
 
 Todo list:
 - rest of API tests
+- race conditions in in mem
 - documentation
     - README
 - healthcheck
-- metrics?
 - change in mem key from UUID to string
 - embed docs
 - datastore takes context
